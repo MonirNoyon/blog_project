@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from .import forms
 from .import models
+from .models import Post
+from django.db.models import Q
 
 def add_post(request):
     if request.method == 'POST':
@@ -34,3 +36,14 @@ def delete_post(request, id):
     post.delete()
     
     return redirect ('homepage')
+
+def search(request):
+    query = request.GET.get('q')
+    if query:
+        posts = Post.objects.filter(
+            Q(title__icontains=query) | Q(category__icontains=query)
+        ).distinct()
+    else:
+        posts = Post.objects.all()
+    return render(request, 'base.html', {'posts': posts, 'query': query})
+
